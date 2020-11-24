@@ -3,6 +3,6 @@ package dto
 // CreateTopicRequest ...
 type CreateTopicRequest struct {
 	Topic        string `json:"topic"`
-	Partitions   int    `json:"partitions"`
-	Replications int    `json:"replications"`
+	Partitions   int32  `json:"partitions"`
+	Replications int16  `json:"replications"`
 }
