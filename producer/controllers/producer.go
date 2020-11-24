@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
-	"strconv"
 
 	"github.com/segmentio/kafka-go"
 
@@ -12,22 +11,6 @@ import (
 
 	snappy "github.com/segmentio/kafka-go/snappy"
 )
-
-func generator(writer *kafka.Writer) <-chan int {
-	c := make(chan int)
-
-	go func() {
-		defer close(c)
-		for i := 0; i < 100; i++ {
-			writer.WriteMessages(context.Background(), kafka.Message{
-				Key:   []byte("Key" + strconv.Itoa(i)),
-				Value: []byte("$" + strconv.Itoa(i) + "000"),
-			})
-		}
-	}()
-
-	return c
-}
 
 // Producer ...
 func Producer(w http.ResponseWriter, r *http.Request) {
@@ -45,11 +28,12 @@ func Producer(w http.ResponseWriter, r *http.Request) {
 		CompressionCodec: snappy.NewCompressionCodec(),
 	})
 
-	c := generator(writer)
+	value, _ := json.Marshal(request.Message)
 
-	for i := 0; i < 100; i++ {
-		<-c
-	}
+	writer.WriteMessages(context.Background(), kafka.Message{
+		Key:   []byte(request.Key),
+		Value: []byte(value),
+	})
 
 	if err := writer.Close(); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
