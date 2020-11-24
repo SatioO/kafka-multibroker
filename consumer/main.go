@@ -10,7 +10,7 @@ import (
 
 func main() {
 	reader := kafka.NewReader(kafka.ReaderConfig{
-		Brokers:  []string{"localhost:9091", "localhost:9092", "localhost:9093"},
+		Brokers:  []string{"kafka-1:19091, kafka-2:29092, kafka-3:39093"},
 		Topic:    "balance_details",
 		GroupID:  "group-1",
 		MinBytes: 10e3, // 10KB
