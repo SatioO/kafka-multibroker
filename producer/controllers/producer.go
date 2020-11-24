@@ -1,58 +1,55 @@
 package controllers
 
 import (
-	"context"
 	"encoding/json"
 	"net/http"
-	"time"
 
-	"github.com/segmentio/kafka-go"
-
-	"github.com/kafka/stream/dto"
-
-	snappy "github.com/segmentio/kafka-go/snappy"
+	"github.com/Shopify/sarama"
+	"github.com/gorilla/mux"
+	"github.com/kafka/producer/dto"
 )
 
 // Producer ...
-func Producer(w http.ResponseWriter, r *http.Request) {
+type Producer struct {
+	p sarama.AsyncProducer
+}
+
+// NewProducer ...
+func NewProducer(broker []string) (*Producer, error) {
+	producer, err := sarama.NewAsyncProducer(broker, sarama.NewConfig())
+	if err != nil {
+		return nil, err
+	}
+	return &Producer{p: producer}, nil
+}
+
+// StartProduce ...
+func (p *Producer) StartProduce(w http.ResponseWriter, r *http.Request) {
 	var request dto.ProducerRequest
+	params := mux.Vars(r)
 
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	writer := kafka.NewWriter(kafka.WriterConfig{
-		Brokers:          []string{"localhost:9091", "localhost:9092", "localhost:9093"},
-		Topic:            "balance_details",
-		Balancer:         &kafka.RoundRobin{},
-		BatchTimeout:     10 * time.Millisecond,
-		CompressionCodec: snappy.NewCompressionCodec(),
-	})
+	value, _ := json.Marshal(request.Message)
 
-	value, err := json.Marshal(request.Message)
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	err = writer.WriteMessages(context.Background(), kafka.Message{
-		Key:   []byte(request.Key),
-		Value: []byte(value),
-	})
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	if err := writer.Close(); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+	p.p.Input() <- &sarama.ProducerMessage{
+		Topic: params["topic_name"],
+		Key:   sarama.ByteEncoder([]byte(request.Key)),
+		Value: sarama.ByteEncoder([]byte(value)),
 	}
 
 	w.Header().Set("content-type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Message produced successfully."))
+}
+
+// Close ...
+func (p *Producer) Close() error {
+	if p != nil {
+		return p.p.Close()
+	}
+	return nil
 }

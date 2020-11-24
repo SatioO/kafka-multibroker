@@ -8,24 +8,26 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/kafka/stream/controllers"
+	"github.com/kafka/producer/controllers"
 )
 
 func main() {
 	r := mux.NewRouter()
 	r.Use(mux.CORSMethodMiddleware(r))
 
+	producer, _ := controllers.NewProducer([]string{"localhost:9091", "localhost:9092", "localhost:9093"})
+
 	// TOPIC
 	r.HandleFunc("/topic/list", controllers.ListTopic).Methods(http.MethodGet)
 	r.HandleFunc("/topic/create", controllers.CreateTopic).Methods(http.MethodPost)
 
 	// PRODUCER
-	r.HandleFunc("/produce", controllers.Producer).Methods(http.MethodPost)
+	r.HandleFunc("/produce/{topic_name}", producer.StartProduce).Methods(http.MethodPost)
 
-	log.Println("Server started listening on PORT 3001")
+	log.Println("Server started listening on PORT 3000")
 
 	srv := &http.Server{
-		Addr: "0.0.0.0:3001",
+		Addr: "0.0.0.0:3000",
 		// Good practice to set timeouts to avoid Slowloris attacks.
 		WriteTimeout: time.Second * 15,
 		ReadTimeout:  time.Second * 15,

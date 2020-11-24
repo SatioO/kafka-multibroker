@@ -2,47 +2,44 @@ package controllers
 
 import (
 	"encoding/json"
-	"net"
 	"net/http"
-	"strconv"
 
-	"github.com/kafka/stream/dto"
-	"github.com/segmentio/kafka-go"
+	"github.com/kafka/producer/dto"
 )
 
 // ListTopic ...
 func ListTopic(w http.ResponseWriter, r *http.Request) {
-	conn, err := kafka.Dial("tcp", "localhost:9092")
+	// conn, err := kafka.Dial("tcp", "kafka-2:9092")
 
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
+	// if err != nil {
+	// 	http.Error(w, err.Error(), http.StatusBadRequest)
+	// 	return
+	// }
 
-	defer conn.Close()
+	// defer conn.Close()
 
-	partitions, err := conn.ReadPartitions()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
+	// partitions, err := conn.ReadPartitions()
+	// if err != nil {
+	// 	http.Error(w, err.Error(), http.StatusBadRequest)
+	// 	return
+	// }
 
-	m := map[string]struct{}{}
+	// m := map[string]struct{}{}
 
-	for _, p := range partitions {
-		m[p.Topic] = struct{}{}
-	}
+	// for _, p := range partitions {
+	// 	m[p.Topic] = struct{}{}
+	// }
 
-	response, err := json.Marshal(m)
+	// response, err := json.Marshal(m)
 
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
+	// if err != nil {
+	// 	http.Error(w, err.Error(), http.StatusBadRequest)
+	// 	return
+	// }
 
-	w.Header().Set("content-type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(response)
+	// w.Header().Set("content-type", "application/json")
+	// w.WriteHeader(http.StatusOK)
+	// w.Write(response)
 }
 
 // CreateTopic ...
@@ -50,59 +47,23 @@ func CreateTopic(w http.ResponseWriter, r *http.Request) {
 	var topicRequest dto.CreateTopicRequest
 	json.NewDecoder(r.Body).Decode(&topicRequest)
 
-	conn, err := kafka.Dial("tcp", "localhost:9092")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	defer conn.Close()
+	// kafka.NewAdminClient(&kafka.ConfigMap{})
 
-	controller, err := conn.Controller()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
+	// if err != nil {
+	// 	fmt.Printf("Failed to create Admin client: %s\n", err)
+	// 	os.Exit(1)
+	// }
 
-	var ctrlConn *kafka.Conn
-	ctrlConn, err = kafka.Dial("tcp", net.JoinHostPort(controller.Host, strconv.Itoa(controller.Port)))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	defer ctrlConn.Close()
+	// results, err := client.GetMetadata(&topicRequest.Topic, false, 1000)
 
-	topicConfig := []kafka.TopicConfig{
-		kafka.TopicConfig{
-			Topic:             topicRequest.Topic,
-			NumPartitions:     topicRequest.Partitions,
-			ReplicationFactor: topicRequest.Replications,
-			ConfigEntries: []kafka.ConfigEntry{
-				kafka.ConfigEntry{
-					ConfigName:  "cleanup.policy",
-					ConfigValue: "compact",
-				},
-				kafka.ConfigEntry{
-					ConfigName:  "delete.retention.ms",
-					ConfigValue: "100",
-				},
-				kafka.ConfigEntry{
-					ConfigName:  "segment.ms",
-					ConfigValue: "100",
-				},
-				kafka.ConfigEntry{
-					ConfigName:  "min.cleanable.dirty.ratio",
-					ConfigValue: "0.01",
-				},
-			},
-		},
-	}
+	// if err != nil {
+	// 	fmt.Printf("Failed to create topic: %v\n", err)
+	// 	os.Exit(1)
+	// }
 
-	err = ctrlConn.CreateTopics(topicConfig...)
+	// log.Println(results)
 
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
+	// client.Close()
 
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Topic created successfully."))
