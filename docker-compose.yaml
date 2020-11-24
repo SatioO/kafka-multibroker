@@ -1,0 +1,12 @@
+version: "3.7"
+services:
+  producer:
+    build:
+      dockerfile: Dockerfile
+      context: ./producer
+    ports:
+      - "3001:3001"
+  consumer:
+    build:
+      dockerfile: Dockerfile
+      context: ./consumer

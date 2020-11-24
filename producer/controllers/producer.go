@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/segmentio/kafka-go"
 
@@ -24,16 +25,27 @@ func Producer(w http.ResponseWriter, r *http.Request) {
 	writer := kafka.NewWriter(kafka.WriterConfig{
 		Brokers:          []string{"localhost:9091", "localhost:9092", "localhost:9093"},
 		Topic:            "balance_details",
-		Balancer:         &kafka.LeastBytes{},
+		Balancer:         &kafka.RoundRobin{},
+		BatchTimeout:     10 * time.Millisecond,
 		CompressionCodec: snappy.NewCompressionCodec(),
 	})
 
-	value, _ := json.Marshal(request.Message)
+	value, err := json.Marshal(request.Message)
 
-	writer.WriteMessages(context.Background(), kafka.Message{
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = writer.WriteMessages(context.Background(), kafka.Message{
 		Key:   []byte(request.Key),
 		Value: []byte(value),
 	})
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	if err := writer.Close(); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
