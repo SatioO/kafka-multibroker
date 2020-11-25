@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/Shopify/sarama"
 	"github.com/gorilla/mux"
@@ -23,6 +24,8 @@ func NewProducer(broker []string) (*Producer, error) {
 	return &Producer{p: producer}, nil
 }
 
+var id int
+
 // StartProduce ...
 func (p *Producer) StartProduce(w http.ResponseWriter, r *http.Request) {
 	var request dto.ProducerRequest
@@ -34,10 +37,11 @@ func (p *Producer) StartProduce(w http.ResponseWriter, r *http.Request) {
 	}
 
 	value, _ := json.Marshal(request.Message)
+	id++
 
 	p.p.Input() <- &sarama.ProducerMessage{
 		Topic: params["topic_name"],
-		Key:   sarama.ByteEncoder([]byte(request.Key)),
+		Key:   sarama.ByteEncoder([]byte(strconv.Itoa(id))),
 		Value: sarama.ByteEncoder([]byte(value)),
 	}
 

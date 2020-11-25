@@ -7,8 +7,7 @@ import (
 	"github.com/Shopify/sarama"
 )
 
-// ----- batch handler
-
+// MultiBatchConsumerConfig ...
 type MultiBatchConsumerConfig struct {
 	BufferCapacity        int // msg capacity
 	MaxBufSize            int // max message size
@@ -95,11 +94,6 @@ func (h *multiBatchConsumerGroupHandler) insertMessage(msg *ConsumerSessionMessa
 }
 
 func (h *multiBatchConsumerGroupHandler) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
-
-	// NOTE:
-	// Do not move the code below to a goroutine.
-	// The `ConsumeClaim` itself is called within a goroutine, see:
-	// https://github.com/Shopify/sarama/blob/master/consumer_group.go#L27-L29
 	claimMsgChan := claim.Messages()
 
 	for {
@@ -119,6 +113,4 @@ func (h *multiBatchConsumerGroupHandler) ConsumeClaim(session sarama.ConsumerGro
 			h.mu.Unlock()
 		}
 	}
-
-	return nil
 }

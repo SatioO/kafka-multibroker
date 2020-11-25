@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
+	"runtime"
 	"sync/atomic"
 	"time"
 
@@ -134,7 +136,8 @@ func StartMultiBatchConsumer(broker, topic []string) (*ConsumerGroup, error) {
 	var count int64
 	var start = time.Now()
 	var bufChan = make(chan batchMessages, 1000)
-	for i := 0; i < 8; i++ {
+	log.Println(runtime.NumCPU())
+	for i := 0; i < runtime.NumCPU(); i++ {
 		go func() {
 			for messages := range bufChan {
 				for j := range messages {
@@ -152,9 +155,10 @@ func StartMultiBatchConsumer(broker, topic []string) (*ConsumerGroup, error) {
 		MaxBufSize: 1000,
 		BufChan:    bufChan,
 	})
-	consumer, err := NewConsumerGroup(broker, topic, "multi-batch-consumer-"+fmt.Sprintf("%d", time.Now().Unix()), handler)
+	consumer, err := NewConsumerGroup(broker, topic, "multi-batch-consumer", handler)
 	if err != nil {
 		return nil, err
 	}
+	log.Println("goroutines", runtime.NumGoroutine())
 	return consumer, nil
 }
