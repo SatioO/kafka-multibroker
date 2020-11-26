@@ -60,23 +60,23 @@ services:
       - kafka-1
       - kafka-2
       - kafka-3
-  producer:
-    build:
-      dockerfile: Dockerfile
-      context: ./producer
-    restart: always
-    ports:
-      - "3000:3000"
-    depends_on:
-      - kafka-1
-      - kafka-2
-      - kafka-3
-  consumer:
-    restart: always
-    build:
-      dockerfile: Dockerfile
-      context: ./consumer
-    depends_on:
-      - kafka-1
-      - kafka-2
-      - kafka-3
+  # producer:
+  #   build:
+  #     dockerfile: Dockerfile
+  #     context: ./producer
+  #   restart: always
+  #   ports:
+  #     - "3000:3000"
+  #   depends_on:
+  #     - kafka-1
+  #     - kafka-2
+  #     - kafka-3
+  # consumer:
+  #   restart: always
+  #   build:
+  #     dockerfile: Dockerfile
+  #     context: ./consumer
+  #   depends_on:
+  #     - kafka-1
+  #     - kafka-2
+  #     - kafka-3

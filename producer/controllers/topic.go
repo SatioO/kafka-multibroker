@@ -59,18 +59,12 @@ func CreateTopic(w http.ResponseWriter, r *http.Request) {
 	defer admin.Close()
 
 	cleanupPolicy := "compact"
-	retentionMS := "100"
-	segmentMS := "100"
-	dirtyRatio := "0.01"
 
 	err = admin.CreateTopic(topicRequest.Topic, &sarama.TopicDetail{
 		NumPartitions:     topicRequest.Partitions,
 		ReplicationFactor: topicRequest.Replications,
 		ConfigEntries: map[string]*string{
-			"cleanup.policy":            &cleanupPolicy,
-			"delete.retention.ms":       &retentionMS,
-			"segment.ms":                &segmentMS,
-			"min.cleanable.dirty.ratio": &dirtyRatio,
+			"cleanup.policy": &cleanupPolicy,
 		},
 	}, false)
 

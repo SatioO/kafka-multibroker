@@ -3,7 +3,6 @@ package controllers
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 
 	"github.com/Shopify/sarama"
 	"github.com/gorilla/mux"
@@ -17,7 +16,11 @@ type Producer struct {
 
 // NewProducer ...
 func NewProducer(broker []string) (*Producer, error) {
-	producer, err := sarama.NewAsyncProducer(broker, sarama.NewConfig())
+	config := sarama.NewConfig()
+	// config.Producer.Idempotent = true
+	config.Producer.Compression = sarama.CompressionSnappy
+
+	producer, err := sarama.NewAsyncProducer(broker, config)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +44,7 @@ func (p *Producer) StartProduce(w http.ResponseWriter, r *http.Request) {
 
 	p.p.Input() <- &sarama.ProducerMessage{
 		Topic: params["topic_name"],
-		Key:   sarama.ByteEncoder([]byte(strconv.Itoa(id))),
+		Key:   sarama.ByteEncoder([]byte(request.Key)),
 		Value: sarama.ByteEncoder([]byte(value)),
 	}
 
