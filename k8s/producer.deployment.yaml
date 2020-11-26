@@ -1,20 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: kafka-consumer
+  name: kafka-producer
 spec:
   selector:
     matchLabels:
-      app: kafka-consumer
+      app: kafka-producer
+      type: queue
   template:
     metadata:
       labels:
-        app: kafka-consumer
+        app: kafka-producer
+        type: queue
     spec:
       containers:
-      - name: kafka-consumer
-        image: <Image>
+      - name: kafka-producer
+        image: vaibhavsatam/kafka_producer
         resources:
           limits:
             memory: "128Mi"
             cpu: "500m"
+        ports:
+        - containerPort: 3000
