@@ -5,7 +5,7 @@ metadata:
 spec:
   kafka:
     version: 2.6.0
-    replicas: 1
+    replicas: 2
     listeners:
       - name: plain
         port: 9092
@@ -24,6 +24,9 @@ spec:
             - broker: 0
               advertisedHost: my-cluster-kafka-a448854c607b0cca.elb.ap-south-1.amazonaws.com
               advertisedPort: 19092
+            - broker: 1
+              advertisedHost: my-cluster-kafka-a448854c607b0cca.elb.ap-south-1.amazonaws.com
+              advertisedPort: 29092
     # This configuration enables network load balancer for each broker. 
     # template:
     #   externalBootstrapService:
