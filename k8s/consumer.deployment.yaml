@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-consumer
+spec:
+  selector:
+    matchLabels:
+      name: kafka-consumer
+      type: queue
+  template:
+    metadata:
+      labels:
+        name: kafka-consumer
+        type: queue
+    spec:
+      containers:
+        - name: kafka-consumer
+          image: vaibhavsatam/kafka_consumer
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "500m"

@@ -12,7 +12,7 @@ import (
 
 func main() {
 	topic := []string{"balance_details"}
-	broker := []string{"localhost:9091", "localhost:9092", "localhost:9093"}
+	broker := []string{"127.0.0.1:9094"}
 
 	consumer, _ := modes.StartMultiBatchConsumer(broker, topic)
 	defer consumer.Close()
