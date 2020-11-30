@@ -12,7 +12,7 @@ import (
 
 func main() {
 	topic := []string{"balance_details"}
-	broker := []string{"127.0.0.1:9094"}
+	broker := []string{"my-cluster-kafka-bootstrap:9092"}
 
 	consumer, _ := modes.StartMultiBatchConsumer(broker, topic)
 	defer consumer.Close()

@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"time"
 
@@ -12,8 +13,9 @@ import (
 
 // ListTopic ...
 func ListTopic(w http.ResponseWriter, r *http.Request) {
+	log.Println("my-cluster-kafka-bootstrap:9092")
 	admin, err := sarama.NewClusterAdmin(
-		[]string{"localhost:9091", "localhost:9092", "localhost:9093"},
+		[]string{"my-cluster-kafka-bootstrap:9092"},
 		sarama.NewConfig(),
 	)
 
@@ -25,6 +27,7 @@ func ListTopic(w http.ResponseWriter, r *http.Request) {
 	defer admin.Close()
 
 	topics, err := admin.ListTopics()
+	log.Println(topics)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -42,12 +45,12 @@ func ListTopic(w http.ResponseWriter, r *http.Request) {
 func CreateTopic(w http.ResponseWriter, r *http.Request) {
 	var topicRequest dto.CreateTopicRequest
 	json.NewDecoder(r.Body).Decode(&topicRequest)
-
+	
 	config := sarama.NewConfig()
 	config.Admin.Timeout = 10 * time.Second
 
 	admin, err := sarama.NewClusterAdmin(
-		[]string{"localhost:9091", "localhost:9092", "localhost:9093"},
+		[]string{"my-cluster-kafka-bootstrap:9092"},
 		config,
 	)
 
@@ -58,14 +61,9 @@ func CreateTopic(w http.ResponseWriter, r *http.Request) {
 
 	defer admin.Close()
 
-	cleanupPolicy := "compact"
-
 	err = admin.CreateTopic(topicRequest.Topic, &sarama.TopicDetail{
 		NumPartitions:     topicRequest.Partitions,
 		ReplicationFactor: topicRequest.Replications,
-		ConfigEntries: map[string]*string{
-			"cleanup.policy": &cleanupPolicy,
-		},
 	}, false)
 
 	if err != nil {

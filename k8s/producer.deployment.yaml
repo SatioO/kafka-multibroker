@@ -18,7 +18,7 @@ spec:
         image: vaibhavsatam/kafka_producer
         resources:
           limits:
-            memory: "128Mi"
+            memory: "512Mi"
             cpu: "500m"
         ports:
         - containerPort: 3000

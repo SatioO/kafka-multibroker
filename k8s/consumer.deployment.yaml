@@ -18,5 +18,5 @@ spec:
           image: vaibhavsatam/kafka_consumer
           resources:
             limits:
-              memory: "128Mi"
-              cpu: "500m"
+              memory: "64Mi"
+              cpu: "250m"

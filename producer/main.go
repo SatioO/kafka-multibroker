@@ -15,8 +15,8 @@ func main() {
 	r := mux.NewRouter()
 	r.Use(mux.CORSMethodMiddleware(r))
 
-	producer, _ := controllers.NewProducer([]string{"localhost:9091", "localhost:9092", "localhost:9093"})
-	
+	producer, _ := controllers.NewProducer([]string{"my-cluster-kafka-bootstrap:9092"})
+
 	defer producer.Close()
 	// TOPIC
 	r.HandleFunc("/topic/list", controllers.ListTopic).Methods(http.MethodGet)
